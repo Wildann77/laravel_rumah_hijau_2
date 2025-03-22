@@ -4,48 +4,36 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    $title = "Homepage";
 
-// Route untuk halaman utama e-commerce
-Route::get('/shop', function () {
-    return "Selamat datang di toko online kami!";
+    return view('web.homepage', ['title' => $title]);
 });
-
-// Route untuk daftar produk
-Route::get('/products', function () {
-    return "Daftar Produk";
+Route::get('products', function () {
+    $title = "Products";
+    return view('web.products', ['title' => $title]);
 });
-
-// Route untuk menampilkan detail produk berdasarkan ID
-Route::get('/products/{id}', function ($id) {
-    return "Detail Produk dengan ID: " . $id;
+Route::get('product/{slug}', function ($slug) {
+    $title = "Single Product";
+    return view('web.single_product', ['title' => $title, 'slug' => $slug]);
 });
-
-// Route untuk menambahkan produk ke keranjang belanja
-Route::post('/cart/add', function () {
-    return "Produk ditambahkan ke keranjang!";
+Route::get('categories', function () {
+    $title = "Categories";
+    return view('web.categories', ['title' => $title]);
 });
-
-// Route untuk melihat isi keranjang belanja
-Route::get('/cart', function () {
-    return "Isi Keranjang Belanja";
+Route::get('category/{slug}', function ($slug) {
+    $title = "Single Category";
+    return view('web.single_category', ['title' => $title, 'slug' => $slug]);
 });
-
-// Route untuk melakukan checkout
-Route::get('/checkout', function () {
-    return "Halaman Checkout";
+Route::get('cart', function () {
+    $title = "Cart";
+    return view('web.cart', ['title' => $title]);
+});
+Route::get('checkout', function () {
+    $title = "Checkout";
+    return view('web.checkout', ['title' => $title]);
 });
 
 
-
-Route::get('/hello-world', function () {
-    return "Hello World";
-});
-
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
