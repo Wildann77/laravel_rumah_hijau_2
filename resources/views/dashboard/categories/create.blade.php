@@ -7,10 +7,10 @@
     </div>
     @if(session()->has('successMessage'))
     <flux:badge color="lime" class="mb-3
-w-full">{{session()->get('successMessage')}}</flux:badge>
+        w-full">{{session()->get('successMessage')}}</flux:badge>
     @elseif(session()->has('errorMessage'))
     <flux:badge color="red" class="mb-3
-w-full">{{session()->get('errorMessage')}}</flux:badge>
+        w-full">{{session()->get('errorMessage')}}</flux:badge>
     @endif
     <form action="{{ route('categories.store') }}" method="post"
         enctype="multipart/form-data">
