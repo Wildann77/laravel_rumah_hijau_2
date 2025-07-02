@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -10,7 +9,7 @@ class ProductResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @return array<string, mixed>
+     * @return array<string, 
      */
     public $status;
     public $message;
@@ -18,7 +17,7 @@ class ProductResource extends JsonResource
     public function __construct($resource, $status = 200, $message = 'Success')
     {
         parent::__construct($resource);
-        $this->status = $status;
+        $this->status  = $status;
         $this->message = $message;
     }
     public function toArray(Request $request): array
@@ -26,7 +25,7 @@ class ProductResource extends JsonResource
         return [
             'success' => $this->status,
             'message' => $this->message,
-            'data' => $this->resource
+            'data'    => $this->resource,
         ];
     }
 }
