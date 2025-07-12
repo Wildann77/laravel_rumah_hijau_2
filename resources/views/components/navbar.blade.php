@@ -1,8 +1,8 @@
 <div>
     <nav class="navbar navbar-expand-lg p-3" style="background: linear-gradient(90deg,
-#4e54c8 0%, #8f94fb 100%);">
+ #f4f6eb 100%);">
         <div class="container">
-            <a class="navbar-brand text-white" href="/">E-Commerce</a>
+            <a class="navbar-brand text-[#798a47]" href="/">Rumah Hijau</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -10,13 +10,13 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active text-white" aria-current="page" href="/">Beranda</a>
+                        <a class="nav-link activate text-[#798a47]" aria-current="page" href="/">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="/categories">Kategori</a>
+                        <a class="nav-link text-[#798a47]" href="/categories">Kategori</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="/products">Produk</a>
+                        <a class="nav-link text-[#798a47]" href="/products">Produk</a>
                     </li>
                 </ul>
                 <x-cart-icon></x-cart-icon>
@@ -39,7 +39,7 @@
                     </div>
                 @else
                     <a class="btn btn-outline-light me-2" href="{{ route('customer.login') }}">Login</a>
-                    <a class="btn btn-light text-primary" href="{{ route('customer.register') }}">Register</a>
+                    <a class="inline-block px-4 py-2 rounded bg-[#b5c63c] text-white hover:bg-[#a0b033] transition" href="{{ route('customer.register') }}">Register</a>
                 @endif
             </div>
         </div>
