@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Product;
 use App\Models\Categories;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class ProductController extends Controller
 {
@@ -19,8 +19,36 @@ class ProductController extends Controller
 
         return view('dashboard.products.index', [
             'products' => $products,
-            'q' => $request->q
+            'q'        => $request->q,
         ]);
+    }
+
+    public function sync($id, Request $request)
+    {
+        $product = Product::findOrFail($id);
+
+        $response = Http::post('https://api.phb-umkm.my.id/api/product/sync', [
+            'client_id'         => env('CLIENT_ID'),
+            'client_secret'     => env('CLIENT_SECRET'),
+            'seller_product_id' => (string) $product->id,
+            'name'              => $product->name,
+            'description'       => $product->description,
+            'price'             => $product->price,
+            'stock'             => $product->stock,
+            'sku'               => $product->sku,
+            'image_url'         => $product->image_url,
+            'weight'            => $product->weight,
+            'is_active'         => $request->is_active == 1 ? false : true,
+            'category_id'       => (string) $product->category->hub_category_id,
+        ]);
+
+        if ($response->successful() && isset($response['product_id'])) {
+            $product->hub_product_id = $request->is_active == 1 ? null : $response['product_id'];
+            $product->save();
+        }
+
+        session()->flash('successMessage', 'Product Synced Successfully');
+        return redirect()->back();
     }
 
     public function create()
@@ -32,40 +60,39 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
-            'sku' => 'required|string|max:50',
-            'stock' => 'required|integer',
-            'is_active' => 'required|boolean',
+            'name'                => 'required|string|max:255',
+            'slug'                => 'required|string|max:255',
+            'sku'                 => 'required|string|max:50',
+            'stock'               => 'required|integer',
+            'is_active'           => 'required|boolean',
             'product_category_id' => 'required|exists:product_categories,id',
-            'description' => 'required',
-            'price' => 'required|numeric',
-            'image' => 'nullable|image'
+            'description'         => 'required',
+            'price'               => 'required|numeric',
+            'image'               => 'nullable|image',
         ]);
-
 
         if ($validator->fails()) {
             return redirect()->back()->with([
-                'errors' => $validator->errors(),
-                'errorMessage' => 'Validasi Error, Silahkan lengkapi data terlebih dahulu'
+                'errors'       => $validator->errors(),
+                'errorMessage' => 'Validasi Error, Silahkan lengkapi data terlebih dahulu',
             ]);
         }
 
-        $product = new Product;
-        $product->name = $request->name;
-        $product->slug = $request->slug;
-        $product->sku = $request->sku;
-        $product->stock = $request->stock;
-        $product->is_active = $request->is_active;
-        $product->description = $request->description;
+        $product                      = new Product;
+        $product->name                = $request->name;
+        $product->slug                = $request->slug;
+        $product->sku                 = $request->sku;
+        $product->stock               = $request->stock;
+        $product->is_active           = $request->is_active;
+        $product->description         = $request->description;
         $product->product_category_id = $request->product_category_id;
 
         $product->price = $request->price;
 
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = $image->storeAs('uploads/products', $imageName, 'public');
+            $image              = $request->file('image');
+            $imageName          = time() . '_' . $image->getClientOriginalName();
+            $imagePath          = $image->storeAs('uploads/products', $imageName, 'public');
             $product->image_url = $imagePath;
         }
 
@@ -81,27 +108,27 @@ class ProductController extends Controller
 
     public function edit(string $id)
     {
-        $product = Product::findOrFail($id);
+        $product    = Product::findOrFail($id);
         $categories = Categories::all();
 
         return view('dashboard.products.edit', [
-            'product' => $product,
-            'categories' => $categories
+            'product'    => $product,
+            'categories' => $categories,
         ]);
     }
 
     public function update(Request $request, string $id)
     {
         $validator = \Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
-            'sku' => 'required|string|max:50',
-            'stock' => 'required|integer',
-            'is_active' => 'required|boolean',
+            'name'                => 'required|string|max:255',
+            'slug'                => 'required|string|max:255',
+            'sku'                 => 'required|string|max:50',
+            'stock'               => 'required|integer',
+            'is_active'           => 'required|boolean',
             'product_category_id' => 'required|exists:product_categories,id',
-            'description' => 'required',
-            'price' => 'required|numeric',
-            'image' => 'nullable|image'
+            'description'         => 'required',
+            'price'               => 'required|numeric',
+            'image'               => 'nullable|image',
         ]);
 
         if ($validator->fails()) {
@@ -110,22 +137,21 @@ class ProductController extends Controller
                 ->withInput()
                 ->with('errorMessage', 'Validasi Error, Silahkan lengkapi data terlebih dahulu');
         }
-        
 
-        $product = Product::findOrFail($id);
-        $product->name = $request->name;
-        $product->slug = $request->slug;
-        $product->sku = $request->sku;
-        $product->stock = $request->stock;
-        $product->is_active = $request->is_active;
-        $product->description = $request->description;
+        $product                      = Product::findOrFail($id);
+        $product->name                = $request->name;
+        $product->slug                = $request->slug;
+        $product->sku                 = $request->sku;
+        $product->stock               = $request->stock;
+        $product->is_active           = $request->is_active;
+        $product->description         = $request->description;
         $product->product_category_id = $request->product_category_id;
-        $product->price = $request->price;
+        $product->price               = $request->price;
 
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = $image->storeAs('uploads/products', $imageName, 'public');
+            $image              = $request->file('image');
+            $imageName          = time() . '_' . $image->getClientOriginalName();
+            $imagePath          = $image->storeAs('uploads/products', $imageName, 'public');
             $product->image_url = $imagePath; // ✅ Sudah benar
         }
 
@@ -133,7 +159,6 @@ class ProductController extends Controller
 
         return redirect()->back()->with(['successMessage' => 'Produk berhasil diupdate']);
     }
-
 
     public function destroy(string $id)
     {

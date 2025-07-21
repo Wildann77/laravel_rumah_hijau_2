@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Categories; // Pastikan model ini ada
+use App\Models\Categories;
+use Illuminate\Http\Request; // Pastikan model ini ada
+use Illuminate\Support\Facades\Http;
 
 class ProductCategoryController extends Controller
 {
@@ -21,8 +21,30 @@ class ProductCategoryController extends Controller
 
         return view('dashboard.categories.index', [
             'categories' => $categories,
-            'q' => $request->q
+            'q'          => $request->q,
         ]);
+    }
+
+    public function sync($id, Request $request)
+    {
+        $category = Categories::findOrFail($id);
+
+        $response = Http::post('https://api.phb-umkm.my.id/api/product-category/sync', [
+            'client_id'                  => env('CLIENT_ID'),
+            'client_secret'              => env('CLIENT_SECRET'),
+            'seller_product_category_id' => (string) $category->id,
+            'name'                       => $category->name,
+            'description'                => $category->description,
+            'is_active'                  => $request->is_active == 1 ? false : true,
+        ]);
+
+        if ($response->successful() && isset($response['product_category_id'])) {
+            $category->hub_category_id = $request->is_active == 1 ? null : $response['product_category_id'];
+            $category->save();
+        }
+
+        session()->flash('successMessage', 'Category Synced Successfully');
+        return redirect()->back();
     }
 
     /**
@@ -43,9 +65,9 @@ class ProductCategoryController extends Controller
         {
 
             $validator = \Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255',
-                'description' => 'required'
+                'name'        => 'required|string|max:255',
+                'slug'        => 'required|string|max:255',
+                'description' => 'required',
             ]);
             /**
              * jika validasi gagal,
@@ -54,21 +76,21 @@ class ProductCategoryController extends Controller
             if ($validator->fails()) {
                 return redirect()->back()->with(
                     [
-                        'errors' => $validator->errors(),
+                        'errors'       => $validator->errors(),
                         'errorMessage' => 'Validasi Error, Silahkan
-                         lengkapi data terlebih dahulu'
+                         lengkapi data terlebih dahulu',
                     ]
                 );
             }
-            $category = new Categories;
-            $category->name = $request->name;
-            $category->slug = $request->slug;
+            $category              = new Categories;
+            $category->name        = $request->name;
+            $category->slug        = $request->slug;
             $category->description = $request->description;
 
             if ($request->hasFile('image')) {
-                $image = $request->file('image');
+                $image     = $request->file('image');
                 $imageName = time() . '_' .
-                    $image->getClientOriginalName();
+                $image->getClientOriginalName();
                 $imagePath = $image->storeAs(
                     'uploads/categories',
                     $imageName,
@@ -80,7 +102,7 @@ class ProductCategoryController extends Controller
             return redirect()->back()
                 ->with(
                     [
-                        'successMessage' => 'Data Berhasil Disimpan'
+                        'successMessage' => 'Data Berhasil Disimpan',
                     ]
                 );
         }
@@ -93,7 +115,7 @@ class ProductCategoryController extends Controller
     {
         $category = Categories::find($id);
         return view('dashboard.categories.detail', [
-            'category' => $category
+            'category' => $category,
         ]);
         // Tampilkan kategori berdasarkan ID
     }
@@ -105,10 +127,9 @@ class ProductCategoryController extends Controller
     {
         $category = Categories::find($id);
         return view('dashboard.categories.edit', [
-            'category' => $category
+            'category' => $category,
         ]);
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -119,9 +140,9 @@ class ProductCategoryController extends Controller
          * cek validasi input
          */
         $validator = \Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
-            'description' => 'required'
+            'name'        => 'required|string|max:255',
+            'slug'        => 'required|string|max:255',
+            'description' => 'required',
         ]);
         /**
          * jika validasi gagal,
@@ -130,20 +151,20 @@ class ProductCategoryController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->with(
                 [
-                    'errors' => $validator->errors(),
+                    'errors'       => $validator->errors(),
                     'errorMessage' => 'Validasi Error, Silahkan
-                lengkapi data terlebih dahulu'
+                lengkapi data terlebih dahulu',
                 ]
             );
         }
-        $category = Categories::find($id);
-        $category->name = $request->name;
-        $category->slug = $request->slug;
+        $category              = Categories::find($id);
+        $category->name        = $request->name;
+        $category->slug        = $request->slug;
         $category->description = $request->description;
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
+            $image     = $request->file('image');
             $imageName = time() . '_' .
-                $image->getClientOriginalName();
+            $image->getClientOriginalName();
             $imagePath = $image->storeAs(
                 'uploads/categories',
                 $imageName,
@@ -155,7 +176,7 @@ class ProductCategoryController extends Controller
         return redirect()->back()
             ->with(
                 [
-                    'successMessage' => 'Data Berhasil Disimpan'
+                    'successMessage' => 'Data Berhasil Disimpan',
                 ]
             );
     }
@@ -170,7 +191,7 @@ class ProductCategoryController extends Controller
         return redirect()->back()
             ->with(
                 [
-                    'successMessage' => 'Data Berhasil Dihapus'
+                    'successMessage' => 'Data Berhasil Dihapus',
                 ]
             );
     }
