@@ -23,6 +23,7 @@ class ProductController extends Controller
         ]);
     }
 
+    // berfungsi untuk menyinkronkan data produk lokal ke server eksternal (API pihak ketiga)
     public function sync($id, Request $request)
     {
         $product = Product::findOrFail($id);
